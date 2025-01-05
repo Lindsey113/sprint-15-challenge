@@ -2,27 +2,17 @@ const User = require('./auth-model')
 //const bcrypt = require('bcryptjs')
 
 async function usernameAvailability(req, res, next) {
-  const { username } = req.body;
-  if (!username) return next(); // Skip validation if username is missing
-
-  const existingUser = await User.findBy({username})
-  if (existingUser) {
-    return res.status(409).json({ message: "username taken" });
-  }
-
-  next()
-
-    // try {
-    //     const {username} = req.body
-    //     const existingUser = await User.findBy({username})
-    //     if(existingUser && existingUser.length){
-    //         res.status(422).json({message: "username taken"})
-    //     } else {
-    //         next()
-    //     }
-    // } catch(err) {
-    //     next(err)
-    // }
+    try {
+        const {username} = req.body
+        const existingUser = await User.findBy({username})
+        if(existingUser && existingUser.length){
+            res.status(422).json({message: "username taken"})
+        } else {
+            next()
+        }
+    } catch(err) {
+        next(err)
+    }
 }
 
 function validateLoginInput(req, res, next) {

@@ -3,17 +3,34 @@ const Auth = require('./auth-model')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken');
 const restricted = require('../middleware/restricted');
+const { usernameAvailability } = require('./auth-middleware');
 
-router.get('/api/jokes', (req, res, next) => {
-  Auth.find()
-    .then(users => {
-      res.json(users)
-    })
-    .catch(next)
-})
+// router.get('/api/jokes', (req, res, next) => {
+//   Auth.find()
+//     .then(users => {
+//       res.json(users)
+//     })
+//     .catch(next)
+// })
 
-router.post('/register', restricted, (req, res, next) => {
-  res.end('implement register, please!')
+router.post('/register', usernameAvailability, (req, res, next) => {
+  const { username, password } = req.body
+  const hash = bcrypt.hashSync(password, 8)
+  try {
+    if (!username || !password) {
+      res.status(401).json({ message: "username and password required" })
+    } else if(username && password) {
+      Auth.add({ username, password: hash })
+      .then(saved => {
+        res.status(201).json(saved)
+        console.log(saved)
+      })
+      .catch(next)
+    }
+  } catch (err) {
+    next(err)
+  }
+
   /*
     IMPLEMENT
     You are welcome to build additional middlewares to help with the endpoint's functionality.

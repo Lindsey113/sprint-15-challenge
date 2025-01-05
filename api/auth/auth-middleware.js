@@ -15,13 +15,20 @@ async function usernameAvailability(req, res, next) {
     }
 }
 
+function validateLoginInput(req, res, next) {
+    const { username, password } = req.body
+    if (!username || !password) {
+      return res.status(401).json({ message: "username and password required" });
+    }
+    next()
+  }
+
 async function checkUsernameExists (req, res, next) {
     try {
         const { username } = req.body
         const [user] = await User.findBy({username})
-        if(user !== username) {
-         res.status(401).json({message: "invalid credentials"})
-         next()
+        if(!user || user.username !== username) {
+         return res.status(401).json({message: "invalid credentials"})
         } else {
           req.user = user
           next()
@@ -33,5 +40,6 @@ async function checkUsernameExists (req, res, next) {
 
 module.exports = {
     usernameAvailability,
-    checkUsernameExists
+    checkUsernameExists,
+    validateLoginInput
 }

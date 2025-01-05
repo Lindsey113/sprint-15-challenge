@@ -2,17 +2,8 @@ const router = require('express').Router();
 const Auth = require('./auth-model')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken');
-const restricted = require('../middleware/restricted');
-const { usernameAvailability, checkUsernameExists } = require('./auth-middleware');
+const { usernameAvailability, checkUsernameExists, validateLoginInput } = require('./auth-middleware');
 const {JWT_SECRET} = require('../secrets/index')
-
-// router.get('/api/jokes', (req, res, next) => {
-//   Auth.find()
-//     .then(users => {
-//       res.json(users)
-//     })
-//     .catch(next)
-// })
 
 router.post('/register', usernameAvailability, (req, res, next) => {
   const { username, password } = req.body
@@ -59,21 +50,17 @@ router.post('/register', usernameAvailability, (req, res, next) => {
   */
 });
 
-router.post('/login', checkUsernameExists, (req, res, next) => {
+router.post('/login', validateLoginInput, checkUsernameExists, (req, res, next) => {
   const { username, password } = req.body
   try {
-    if (!username || !password) {
-      return res.status(401).json({ message: "username and password required" })
-    } else if(username && password) {
-     if(bcrypt.compareSync(req.body.password, req.user.password)){
-    const token = buildToken(req.user)
-    res.json({
-      message: `welcome, ${req.body.username}`, token
-    })
-  } else {
-    res.status(401).json({message: "invalid credentials"})
-  } 
-    }
+    if(bcrypt.compareSync(password, req.user.password)){
+      const token = buildToken(req.user)
+      res.json({
+        message: `welcome, ${username}`, token
+      })
+    } else {
+      return res.status(401).json({message: "invalid credentials"})
+    } 
   } catch (err) {
     next(err)
   }

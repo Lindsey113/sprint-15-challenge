@@ -21,7 +21,7 @@ async function add(user) {
         const [id] = await db('users').insert(user)
         return findById(id)
       } catch (err) {
-        console.error('Error inserting user:', err)
+        console.log('Error inserting user:', err)
         throw err
       }
     }

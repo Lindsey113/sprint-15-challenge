@@ -3,22 +3,18 @@ const Auth = require('./auth-model')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken');
 const { usernameAvailability, checkUsernameExists, validateLoginInput } = require('./auth-middleware');
-const {JWT_SECRET} = require('../secrets/index')
+const { JWT_SECRET } = require('../secrets/index')
 
-router.post('/register', usernameAvailability, (req, res, next) => {
+router.post('/register', usernameAvailability, async (req, res, next) => {
   const { username, password } = req.body
   const hash = bcrypt.hashSync(password, 8)
   try {
     if (!username || !password) {
-      res.status(401).json({ message: "username and password required" })
-    } else if(username && password) {
-      Auth.add({ username, password: hash })
-      .then(saved => {
-        res.status(201).json(saved)
-        console.log(saved)
-      })
-      .catch(next)
+      return res.status(401).json({ message: "username and password required" })
     }
+    const saved = await Auth.add({ username, password: hash });
+    res.status(201).json(saved)
+
   } catch (err) {
     next(err)
   }
@@ -53,14 +49,14 @@ router.post('/register', usernameAvailability, (req, res, next) => {
 router.post('/login', validateLoginInput, checkUsernameExists, (req, res, next) => {
   const { username, password } = req.body
   try {
-    if(bcrypt.compareSync(password, req.user.password)){
+    if (bcrypt.compareSync(password, req.user.password)) {
       const token = buildToken(req.user)
       res.json({
         message: `welcome, ${username}`, token
       })
     } else {
-      return res.status(401).json({message: "invalid credentials"})
-    } 
+      return res.status(401).json({ message: "invalid credentials" })
+    }
   } catch (err) {
     next(err)
   }
@@ -68,7 +64,7 @@ router.post('/login', validateLoginInput, checkUsernameExists, (req, res, next) 
 
 
 
-  
+
   /*
     IMPLEMENT
     You are welcome to build additional middlewares to help with the endpoint's functionality.

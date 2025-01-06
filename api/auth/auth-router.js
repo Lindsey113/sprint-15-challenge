@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 const { usernameAvailability, checkUsernameExists, validateLoginInput } = require('./auth-middleware');
 const {JWT_SECRET} = require('../secrets/index')
 
-router.post('/register', usernameAvailability, (req, res, next) => {
+router.post('/register', validateLoginInput, usernameAvailability, (req, res, next) => {
   const { username, password } = req.body
   const hash = bcrypt.hashSync(password, 8)
   try {

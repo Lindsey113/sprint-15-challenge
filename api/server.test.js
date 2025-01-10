@@ -1,6 +1,6 @@
 const db = require('../data/dbConfig')
 const request = require('supertest')
-const {server} = require('./server')
+const { server } = require('./server')
 
 beforeAll(async () => {
   await db.migrate.rollback()
@@ -19,7 +19,7 @@ afterAll(async () => {
 //   const newUser = { username: 'gunch', password: '1234' };
 
 //   test('adds a new user to the db', async () => {
-    
+
 //   })
 // })
 
